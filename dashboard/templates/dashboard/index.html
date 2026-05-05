@@ -1,0 +1,256 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aimiracle CRM Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #111827;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            text-decoration: none;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .sidebar a:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            padding: 8px 14px;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .blue { background: linear-gradient(45deg, #3b82f6, #2563eb); }
+        .green { background: linear-gradient(45deg, #10b981, #059669); }
+        .purple { background: linear-gradient(45deg, #8b5cf6, #6d28d9); }
+        .orange { background: linear-gradient(45deg, #f59e0b, #d97706); }
+
+        .chart-container {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f1f1;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div style="text-align:center; margin-bottom:20px;">
+        <img src="{% static 'images/logo.png' %}" style="width:120px;">
+    </div>
+
+    <a href="/">Dashboard</a>
+
+    {% if dashboard_type == 'admin' %}
+        <a href="/admin/">Admin Panel</a>
+        <a href="/admin/orders/order/">Orders</a>
+        <a href="/admin/clients/client/">Clients</a>
+        <a href="/admin/products/product/">Products</a>
+        <a href="/admin/training/trainingsession/">Training</a>
+
+    {% elif dashboard_type == 'sales' %}
+        <a href="/admin/orders/order/">Orders</a>
+        <a href="/admin/clients/client/">Clients</a>
+
+    {% elif dashboard_type == 'trainer' %}
+        <a href="/admin/training/trainingsession/">Training Sessions</a>
+
+    {% else %}
+        <a href="/admin/products/product/">Inventory</a>
+        <a href="/admin/orders/order/">Orders</a>
+    {% endif %}
+</div>
+
+<!-- Main -->
+<div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div>
+            {% if dashboard_type == 'admin' %}
+                <h2>Admin Dashboard</h2>
+            {% elif dashboard_type == 'sales' %}
+                <h2>Sales Dashboard</h2>
+            {% elif dashboard_type == 'trainer' %}
+                <h2>Trainer Dashboard</h2>
+            {% else %}
+                <h2>Operations Dashboard</h2>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid">
+        <div class="card blue">
+            <h3>Total Orders</h3>
+            <p>{{ total_orders }}</p>
+        </div>
+
+        <div class="card green">
+            <h3>Total Clients</h3>
+            <p>{{ total_clients }}</p>
+        </div>
+
+        <div class="card purple">
+            <h3>Total Products</h3>
+            <p>{{ total_products }}</p>
+        </div>
+
+        <div class="card orange">
+            <h3>Total Revenue</h3>
+            <p>₹{{ total_revenue }}</p>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container">
+        <h3>Sales Overview</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <!-- Low Stock (ADMIN ONLY) -->
+    {% if dashboard_type == 'admin' %}
+    <div class="chart-container">
+        <h3 style="color:red;">⚠ Low Stock Alert</h3>
+
+        {% if low_stock_products %}
+            <ul>
+                {% for product in low_stock_products %}
+                    <li>{{ product.name }} — Remaining: {{ product.stock_quantity }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No low stock items</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Recent Orders -->
+    <div class="chart-container">
+        <h3>Recent Orders</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.client }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.payment_status }}</td>
+                    <td>₹{{ order.total_amount }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Revenue',
+            data: {{ data|safe }},
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            fill: true
+        }]
+    }
+});
+</script>
+
+</body>
+</html>

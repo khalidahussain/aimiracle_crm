@@ -1,0 +1,165 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        .company {
+            text-align: right;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .box {
+            width: 48%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #f5f5f5;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        .total {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            font-size: 14px;
+        }
+
+        .bank {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="logo">
+        <img src="{{ request.build_absolute_uri }}{% static 'images/logo.png' %}">
+    </div>
+
+    <div class="company">
+        <h3>Aimiracle Pvt Ltd</h3>
+        <p>Raipur, Chhattisgarh</p>
+        <p>Phone: +91-XXXXXXXXXX</p>
+        <p>Email: info@aimiracle.in</p>
+        <p><strong>GST:</strong> 22XXXXX1234Z5</p>
+    </div>
+</div>
+
+<h2>INVOICE</h2>
+
+<!-- CLIENT + SHIPPING -->
+<div class="details">
+
+    <div class="box">
+        <strong>Bill To:</strong><br>
+        {{ order.client.school_name }}<br>
+        {{ order.client.address }}<br>
+        Phone: {{ order.client.phone }}
+    </div>
+
+    <div class="box">
+        <strong>Invoice Details:</strong><br>
+        Invoice No: #{{ order.id }}<br>
+        Date: {{ order.created_at|date:"d M Y" }}<br>
+        Status: {{ order.status }}
+    </div>
+
+</div>
+
+<!-- ITEMS TABLE -->
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>₹{{ item.get_total_price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- TOTAL -->
+<div class="total">
+    <h3>Total: ₹{{ order.total_amount }}</h3>
+</div>
+
+<!-- BANK DETAILS -->
+<div class="bank">
+    <strong>Bank Details:</strong><br>
+    Account Name: Aimiracle Pvt Ltd<br>
+    Bank: HDFC Bank<br>
+    Account No: XXXXXXXXXXXX<br>
+    IFSC: HDFC000XXXX<br>
+    UPI: aimiracle@upi
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <p>Thank you for your business!</p>
+    <p>This is a computer-generated invoice.</p>
+</div>
+
+</body>
+</html>
