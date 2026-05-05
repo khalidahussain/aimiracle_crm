@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['.onrender.com', 'crm.aimiracle.in']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 # Application definition
@@ -160,5 +161,9 @@ cloudinary.config(
     api_key = "119598991295526",
     api_secret = "E1DZC0Ik8lBYBx8cub-eg94-BOk"
 )
+
+CLOUDINARY_STORAGE = {
+    'SECURE': True
+}
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

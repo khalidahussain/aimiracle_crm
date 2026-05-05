@@ -18,12 +18,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+
+def home_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')  # your dashboard url name
+    return redirect('login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('orders/', include('orders.urls')),
     path('', include('dashboard.urls')),
     path('', include('accounts.urls')),
+    path('', home_redirect),
 ]
 
 
