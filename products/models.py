@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -7,7 +8,6 @@ class Product(models.Model):
     stock_quantity = models.IntegerField(default=0)
     low_stock_threshold = models.IntegerField(default=5)
 
-    image = models.ImageField(upload_to='products/', null=True, blank=True)
-
+    image = CloudinaryField('image', blank=True, null=True)
     def __str__(self):
         return self.name

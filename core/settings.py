@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'dashboard.apps.DashboardConfig',
     'accounts.apps.AccountsConfig',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -150,3 +152,13 @@ DATABASES = {
     conn_max_age=600
     )
 }
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name = "dwmlpyclh",
+    api_key = "119598991295526",
+    api_secret = "E1DZC0Ik8lBYBx8cub-eg94-BOk"
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
